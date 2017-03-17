@@ -29,16 +29,34 @@ G4VPhysicalVolume* DetGeometry::Construct(){
     G4Material* t_material = nist->FindOrBuildMaterial("G4_ANTHRACENE");
 
 //G4Cons* con = new G4Cons ("conus", 20 *cm, 40 *cm, 10 *cm, 20 *cm, 50 *cm, 0, pi);
-    G4Tubs* tube = new G4Tubs ("tube", 0, 100 *cm, 250*cm, 0, pi*2);
-    G4Tubs* res = new G4Tubs ("tube", 0 *cm, 70 *cm, 200 *cm, 0, pi*2);
-    G4Tubs* res2 = new G4Tubs ("tube", 0 *cm, 120 *cm, 20 *cm, 0, pi*2);
+    G4Box* cube = new G4Box ("cube", 100*cm, 100 *cm, 100*cm);
+    G4Tubs* tube = new G4Tubs ("tube", 0 *cm, 50 *cm, 200 *cm, 0, pi*2);
+    //G4Tubs* tube2 = new G4Tubs ("tube", 0 *cm, 70 *cm, 200 *cm, 0, pi*2);
+    //G4Tubs* tube3 = new G4Tubs ("tube", 0 *cm, 70 *cm, 200 *cm, 0, pi*2);
+
+
+
+    //G4Tubs* res2 = new G4Tubs ("tube", 0 *cm, 120 *cm, 20 *cm, 0, pi*2);
     //G4Para* para = new G4Para ("para", 20 *cm, 20 *cm, 20 *cm, pi/3, pi/3, pi/3);
 
+    G4RotationMatrix* RM1 = new G4RotationMatrix (0, pi/2,0);
+    G4RotationMatrix* RM2 = new G4RotationMatrix (pi/2, pi/2, 0);
 
-    G4SubtractionSolid* tubs = new G4SubtractionSolid ("tubes", tube, res, 0, G4ThreeVector(0,0,30*cm));
-    tubs = new G4SubtractionSolid ("tub3", tubs, res2, 0, G4ThreeVector(0,0,240*cm));
-    G4LogicalVolume* tube2 = new G4LogicalVolume (tubs, c_material, "mat_tube");
-    new G4PVPlacement (0, G4ThreeVector(), tube2, "tube2",logicWorld,false,0);
+    G4SubtractionSolid* part = new G4SubtractionSolid ("part", cube, tube, 0, G4ThreeVector());
+    part = new G4SubtractionSolid ("part", part, tube, RM1, G4ThreeVector());
+    part = new G4SubtractionSolid ("part", part, tube, RM2, G4ThreeVector());
+
+
+    G4LogicalVolume* assy = new G4LogicalVolume (part, c_material, "smth");
+    for(int i=0; i<5; i++)
+        for (int j=0; j<5; j++)
+        {
+            {
+                G4RotationMatrix *RMtmp = new G4RotationMatrix(pi/24*i*j, -pi/16*i, pi / 16 * j);
+                new G4PVPlacement(RMtmp, G4ThreeVector(300 * i * cm, 300*j *cm, 0), assy, "assy", logicWorld, false, 0);
+            }
+        }
+    //new G4PVPlacement (0, G4ThreeVector(), assy, "assy",logicWorld,false,0);
 
 
    // G4LogicalVolume* conus2 = new G4LogicalVolume (con, c_material, "mat_cone");
